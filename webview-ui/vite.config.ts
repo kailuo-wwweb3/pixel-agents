@@ -8,4 +8,12 @@ export default defineConfig({
     emptyOutDir: true,
   },
   base: './',
+  server: {
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3000',
+        ws: true,
+      },
+    },
+  },
 });

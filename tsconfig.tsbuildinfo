@@ -1,0 +1,1 @@
+{"root":["./server/src/agentmanager.ts","./server/src/assetloader.ts","./server/src/constants.ts","./server/src/filewatcher.ts","./server/src/index.ts","./server/src/layoutpersistence.ts","./server/src/timermanager.ts","./server/src/transcriptparser.ts","./server/src/types.ts","./server/src/wsmanager.ts"],"errors":true,"version":"5.9.3"}

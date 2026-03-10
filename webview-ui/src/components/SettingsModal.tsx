@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { isSoundEnabled, setSoundEnabled } from '../notificationSound.js';
 import { vscode } from '../vscodeApi.js';
@@ -33,11 +33,59 @@ export function SettingsModal({
 }: SettingsModalProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [soundLocal, setSoundLocal] = useState(isSoundEnabled);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
+  const handleExportLayout = () => {
+    const handler = (e: MessageEvent<unknown>) => {
+      const msg = e.data as { type: string; layout: unknown };
+      if (msg.type !== 'exportLayoutResponse') return;
+      window.removeEventListener('message', handler);
+      if (!msg.layout) return;
+      const blob = new Blob([JSON.stringify(msg.layout, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pixel-agents-layout.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    window.addEventListener('message', handler);
+    vscode.postMessage({ type: 'exportLayout' });
+    onClose();
+  };
+
+  const handleImportLayout = () => {
+    importInputRef.current?.click();
+    onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const layout = JSON.parse(ev.target?.result as string) as Record<string, unknown>;
+        vscode.postMessage({ type: 'importLayout', layout });
+      } catch {
+        console.error('Failed to parse layout file');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".json"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
       {/* Dark backdrop — click to close */}
       <div
         onClick={onClose}
@@ -99,24 +147,7 @@ export function SettingsModal({
         </div>
         {/* Menu items */}
         <button
-          onClick={() => {
-            vscode.postMessage({ type: 'openSessionsFolder' });
-            onClose();
-          }}
-          onMouseEnter={() => setHovered('sessions')}
-          onMouseLeave={() => setHovered(null)}
-          style={{
-            ...menuItemBase,
-            background: hovered === 'sessions' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-          }}
-        >
-          Open Sessions Folder
-        </button>
-        <button
-          onClick={() => {
-            vscode.postMessage({ type: 'exportLayout' });
-            onClose();
-          }}
+          onClick={handleExportLayout}
           onMouseEnter={() => setHovered('export')}
           onMouseLeave={() => setHovered(null)}
           style={{
@@ -127,10 +158,7 @@ export function SettingsModal({
           Export Layout
         </button>
         <button
-          onClick={() => {
-            vscode.postMessage({ type: 'importLayout' });
-            onClose();
-          }}
+          onClick={handleImportLayout}
           onMouseEnter={() => setHovered('import')}
           onMouseLeave={() => setHovered(null)}
           style={{

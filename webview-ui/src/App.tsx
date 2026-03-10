@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { BottomToolbar } from './components/BottomToolbar.js';
 import { DebugView } from './components/DebugView.js';
+import { TerminalPanel } from './components/TerminalPanel.js';
 import { ZoomControls } from './components/ZoomControls.js';
 import { PULSE_ANIMATION_DURATION_SEC } from './constants.js';
 import { useEditorActions } from './hooks/useEditorActions.js';
@@ -342,6 +343,13 @@ function App() {
           onSelectAgent={handleSelectAgent}
         />
       )}
+
+      <TerminalPanel
+        selectedAgentId={selectedAgent}
+        agents={Object.keys(agents)
+          .map(Number)
+          .filter((id) => id > 0)}
+      />
     </div>
   );
 }
