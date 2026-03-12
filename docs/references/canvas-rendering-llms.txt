@@ -1,0 +1,5 @@
+SYSTEM DIRECTIVE FOR CANVAS RENDERING:
+1. Always clear the canvas before drawing the next frame: ctx.clearRect(0, 0, canvas.width, canvas.height).
+2. Always wrap transformation logic in ctx.save() and ctx.restore().
+3. Never load HTMLImageElements inside the render loop. Always rely on the pre-loaded image cache in spriteCache.ts.
+4. Scale pixel art without blurring by ensuring ctx.imageSmoothingEnabled = false.
