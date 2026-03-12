@@ -10,7 +10,9 @@
   "type": "module",
   "scripts": {
     "dev": "npm-run-all -p dev:server dev:webview",
+    "dev:mock": "npm-run-all -p dev:server:mock dev:webview",
     "dev:server": "cd server && npx tsx watch src/index.ts",
+    "dev:server:mock": "cd server && npx tsx watch src/index.ts -- --mock 3",
     "dev:webview": "cd webview-ui && npm run dev -- --open",
     "build": "npm run build:webview && npm run build:server",
     "build:webview": "cd webview-ui && npm run build",

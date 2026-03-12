@@ -11,12 +11,17 @@ import { WsManager } from './wsManager.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Parse --workspace flags
+// Parse CLI flags
 const workspaceFolders: string[] = [];
+let mockCount = 0;
 const args = process.argv.slice(2);
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--workspace' && args[i + 1]) {
     workspaceFolders.push(args[++i]);
+  } else if (args[i] === '--mock') {
+    mockCount = Math.min(Math.max(1, Number(args[i + 1] ?? 3)), 8);
+    if (!isNaN(mockCount) && args[i + 1]) i++;
+    else mockCount = 3;
   }
 }
 if (workspaceFolders.length === 0) {
@@ -81,6 +86,12 @@ const wsManager = new WsManager(workspaceFolders);
 wss.on('connection', (ws) => {
   wsManager.handleConnection(ws).catch(console.error);
 });
+
+// Auto-start mock sessions if --mock flag was provided
+if (mockCount > 0) {
+  console.log(`[Server] Auto-starting ${mockCount} mock agent(s)...`);
+  activeMock = startMockSessions((msg) => wsManager.broadcastToAll(msg), mockCount);
+}
 
 // Cleanup on exit
 process.on('SIGINT', () => {
