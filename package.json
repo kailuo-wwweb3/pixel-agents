@@ -11,10 +11,10 @@
   "scripts": {
     "dev": "npm-run-all -p dev:server dev:webview",
     "dev:server": "cd server && npx tsx watch src/index.ts",
-    "dev:webview": "cd webview-ui && npm run dev",
+    "dev:webview": "cd webview-ui && npm run dev -- --open",
     "build": "npm run build:webview && npm run build:server",
     "build:webview": "cd webview-ui && npm run build",
-    "build:server": "cd server && npx esbuild src/index.ts --bundle --platform=node --format=esm --outfile=../dist/server.js --external:node-pty --external:express --external:ws --external:pngjs",
+    "build:server": "cd server && npx esbuild src/index.ts --bundle --platform=node --format=esm --outfile=../dist/server.js --external:node-pty --external:express --external:ws --external:pngjs && ln -sf ../server/node_modules ../dist/node_modules",
     "start": "node dist/server.js",
     "prepare": "husky",
     "lint": "cd server && npx eslint src",

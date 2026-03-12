@@ -33,7 +33,7 @@ const webviewDist = path.join(__dirname, '..', 'dist', 'webview');
 if (fs.existsSync(webviewDist)) {
   app.use(express.static(webviewDist));
   // SPA fallback
-  app.get('*', (_req, res) => {
+  app.get('/{*splat}', (_req, res) => {
     res.sendFile(path.join(webviewDist, 'index.html'));
   });
 }
