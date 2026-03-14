@@ -8,3 +8,4 @@ node_modules
 /sprites-export
 .env
 scripts/.tileset-working/
+test-results/

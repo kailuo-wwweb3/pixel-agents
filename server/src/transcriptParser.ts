@@ -98,6 +98,7 @@ export function processTranscriptLine(
               type: 'agentToolStart',
               id: agentId,
               toolId: block.id,
+              toolName,
               status,
             });
           }
@@ -265,6 +266,7 @@ function processProgressRecord(
           id: agentId,
           parentToolId,
           toolId: block.id,
+          toolName,
           status,
         });
       }

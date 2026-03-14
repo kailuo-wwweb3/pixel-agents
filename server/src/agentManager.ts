@@ -370,7 +370,8 @@ export function sendExistingAgents(
   // Re-send active tool statuses and waiting states
   for (const [agentId, agent] of agents) {
     for (const [toolId, status] of agent.activeToolStatuses) {
-      send({ type: 'agentToolStart', id: agentId, toolId, status });
+      const toolName = agent.activeToolNames.get(toolId);
+      send({ type: 'agentToolStart', id: agentId, toolId, toolName, status });
     }
     if (agent.isWaiting) {
       send({ type: 'agentStatus', id: agentId, status: 'waiting' });

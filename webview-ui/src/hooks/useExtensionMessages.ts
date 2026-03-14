@@ -193,7 +193,7 @@ export function useExtensionMessages(
           if (list.some((t) => t.toolId === toolId)) return prev;
           return { ...prev, [id]: [...list, { toolId, status, done: false }] };
         });
-        const toolName = extractToolName(status);
+        const toolName = (msg.toolName as string | undefined) ?? extractToolName(status);
         os.setAgentTool(id, toolName);
         os.setAgentActive(id, true);
         os.clearPermissionBubble(id);
@@ -311,7 +311,7 @@ export function useExtensionMessages(
         // Update sub-agent character's tool and active state
         const subId = os.getSubagentId(id, parentToolId);
         if (subId !== null) {
-          const subToolName = extractToolName(status);
+          const subToolName = (msg.toolName as string | undefined) ?? extractToolName(status);
           os.setAgentTool(subId, subToolName);
           os.setAgentActive(subId, true);
         }
