@@ -51,6 +51,8 @@ export interface ExtensionMessageState {
   layoutReady: boolean;
   loadedAssets?: { catalog: FurnitureAsset[]; sprites: Record<string, string[][]> };
   workspaceFolders: WorkspaceFolder[];
+  launchError: string | null;
+  clearLaunchError: () => void;
 }
 
 function saveAgentSeats(os: OfficeState): void {
@@ -80,6 +82,7 @@ export function useExtensionMessages(
     { catalog: FurnitureAsset[]; sprites: Record<string, string[][]> } | undefined
   >();
   const [workspaceFolders, setWorkspaceFolders] = useState<WorkspaceFolder[]>([]);
+  const [launchError, setLaunchError] = useState<string | null>(null);
 
   // Track whether initial layout has been loaded (ref to avoid re-render)
   const layoutReadyRef = useRef(false);
@@ -374,6 +377,10 @@ export function useExtensionMessages(
       } else if (msg.type === 'settingsLoaded') {
         const soundOn = msg.soundEnabled as boolean;
         setSoundEnabled(soundOn);
+      } else if (msg.type === 'agentLaunchError') {
+        const errMsg = msg.message as string;
+        console.error('[Pixel Agents] Agent launch failed:', errMsg);
+        setLaunchError(errMsg);
       } else if (msg.type === 'furnitureAssetsLoaded') {
         try {
           const catalog = msg.catalog as FurnitureAsset[];
@@ -392,6 +399,8 @@ export function useExtensionMessages(
     return () => window.removeEventListener('message', handler);
   }, [getOfficeState]);
 
+  const clearLaunchError = () => setLaunchError(null);
+
   return {
     agents,
     selectedAgent,
@@ -402,5 +411,7 @@ export function useExtensionMessages(
     layoutReady,
     loadedAssets,
     workspaceFolders,
+    launchError,
+    clearLaunchError,
   };
 }

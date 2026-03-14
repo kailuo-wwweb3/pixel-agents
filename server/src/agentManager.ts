@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as pty from 'node-pty';
 import * as os from 'os';
@@ -9,6 +10,39 @@ import { cancelPermissionTimer, cancelWaitingTimer } from './timerManager.js';
 import type { AgentState, PersistedAgent } from './types.js';
 
 const AGENTS_FILE = path.join(os.homedir(), '.pixel-agents', 'agents.json');
+
+/**
+ * Resolve the absolute path to the `claude` CLI.
+ * node-pty inherits a stripped-down PATH in some launch contexts (npx, GUI
+ * terminals, Playwright) that omits user-local bin dirs. We run `which claude`
+ * first, then fall back to known install locations before giving up.
+ */
+export function resolveClaude(): string {
+  try {
+    const resolved = execSync('which claude', { env: process.env }).toString().trim();
+    if (resolved) return resolved;
+  } catch {
+    /* which not found or claude not on current PATH — fall through */
+  }
+
+  const candidates = [
+    path.join(os.homedir(), '.local', 'bin', 'claude'),
+    path.join(os.homedir(), '.npm', 'bin', 'claude'),
+    '/usr/local/bin/claude',
+    '/opt/homebrew/bin/claude',
+    '/usr/bin/claude',
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  throw new Error(
+    'claude CLI not found. Install it with: npm install -g @anthropic-ai/claude-code\n' +
+      `Searched PATH: ${process.env.PATH ?? '(empty)'}\n` +
+      `Also checked: ${candidates.join(', ')}`,
+  );
+}
 
 export function getProjectDirPath(cwd?: string): string | null {
   const workspacePath = cwd || process.cwd();
@@ -39,8 +73,10 @@ export async function launchNewAgent(
   const isMultiRoot = !!(workspaceFolders && workspaceFolders.length > 1);
 
   const sessionId = crypto.randomUUID();
+  const claudePath = resolveClaude();
+  console.log(`[Pixel Agents] Resolved claude at: ${claudePath}`);
 
-  const ptyInstance = pty.spawn('claude', ['--session-id', sessionId], {
+  const ptyInstance = pty.spawn(claudePath, ['--session-id', sessionId], {
     name: 'xterm-color',
     cols: 220,
     rows: 50,

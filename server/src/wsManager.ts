@@ -124,9 +124,16 @@ export class WsManager {
   private cachedDefaultLayout: Record<string, unknown> | null = null;
   // Active WebSocket connections
   private connections = new Set<WebSocket>();
+  // Hooks called with a per-client send fn on each new webviewReady
+  private onNewConnectionHooks: Array<(send: (msg: unknown) => void) => void> = [];
 
   constructor(workspaceFolders: string[]) {
     this.workspaceFolders = workspaceFolders;
+  }
+
+  /** Register a callback invoked for every new client that sends webviewReady. */
+  registerOnNewConnection(hook: (send: (msg: unknown) => void) => void): void {
+    this.onNewConnectionHooks.push(hook);
   }
 
   private persistAgents = (): void => {
@@ -261,23 +268,34 @@ export class WsManager {
       });
 
       sendExistingAgents(this.agents, (msg) => this.send(ws, msg));
+
+      // Announce any externally-tracked agents (e.g. mock sessions) to this client
+      for (const hook of this.onNewConnectionHooks) {
+        hook((msg) => this.send(ws, msg));
+      }
     } else if (message.type === 'openClaude') {
-      await launchNewAgent(
-        this.nextAgentId,
-        this.agents,
-        this.activeAgentId,
-        this.knownJsonlFiles,
-        this.fileWatchers,
-        this.pollingTimers,
-        this.waitingTimers,
-        this.permissionTimers,
-        this.jsonlPollTimers,
-        this.projectScanTimer,
-        send,
-        this.persistAgents,
-        message.folderPath as string | undefined,
-        this.workspaceFolders,
-      );
+      try {
+        await launchNewAgent(
+          this.nextAgentId,
+          this.agents,
+          this.activeAgentId,
+          this.knownJsonlFiles,
+          this.fileWatchers,
+          this.pollingTimers,
+          this.waitingTimers,
+          this.permissionTimers,
+          this.jsonlPollTimers,
+          this.projectScanTimer,
+          send,
+          this.persistAgents,
+          message.folderPath as string | undefined,
+          this.workspaceFolders,
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[WsManager] Failed to launch agent:', message);
+        this.send(ws, { type: 'agentLaunchError', message });
+      }
     } else if (message.type === 'focusAgent') {
       // In browser mode, "focusing" means selecting the agent
       this.activeAgentId.current = message.id as number;

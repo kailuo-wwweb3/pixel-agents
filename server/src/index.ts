@@ -91,6 +91,14 @@ wss.on('connection', (ws) => {
 if (mockCount > 0) {
   console.log(`[Server] Auto-starting ${mockCount} mock agent(s)...`);
   activeMock = startMockSessions((msg) => wsManager.broadcastToAll(msg), mockCount);
+  // Re-announce mock agents to any client that connects after the initial broadcast
+  wsManager.registerOnNewConnection((send) => {
+    if (activeMock) {
+      for (const id of activeMock.agentIds) {
+        send({ type: 'agentCreated', id });
+      }
+    }
+  });
 }
 
 // Cleanup on exit

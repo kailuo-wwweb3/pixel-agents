@@ -138,6 +138,8 @@ function App() {
     layoutReady,
     loadedAssets,
     workspaceFolders,
+    launchError,
+    clearLaunchError,
   } = useExtensionMessages(getOfficeState, editor.setLastSavedLayout, isEditDirty);
 
   const [isDebugMode, setIsDebugMode] = useState(false);
@@ -350,6 +352,52 @@ function App() {
           .map(Number)
           .filter((id) => id > 0)}
       />
+
+      {launchError && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 200,
+            background: 'var(--pixel-danger-bg, #c0392b)',
+            color: '#fff',
+            border: '2px solid #e74c3c',
+            padding: '8px 14px',
+            fontSize: '20px',
+            maxWidth: 480,
+            boxShadow: 'var(--pixel-shadow)',
+            display: 'flex',
+            gap: 10,
+            alignItems: 'flex-start',
+          }}
+          role="alert"
+          data-testid="launch-error-banner"
+        >
+          <span style={{ flex: 1 }}>
+            <b>Failed to launch agent:</b>
+            <br />
+            {launchError.split('\n')[0]}
+          </span>
+          <button
+            onClick={clearLaunchError}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#fff',
+              cursor: 'pointer',
+              fontSize: '24px',
+              lineHeight: 1,
+              padding: 0,
+              flexShrink: 0,
+            }}
+            title="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 }

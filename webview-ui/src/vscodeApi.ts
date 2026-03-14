@@ -1,4 +1,5 @@
-const WS_URL = `ws://localhost:${(import.meta.env.VITE_SERVER_PORT as string | undefined) ?? '3000'}/ws`;
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = `${protocol}//${window.location.host}/ws`;
 let ws: WebSocket | null = null;
 const queue: string[] = [];
 
