@@ -62,7 +62,13 @@ async function runAgentLoop(
       if (signal.stopped) break;
 
       const toolId = uid();
-      broadcast({ type: 'agentToolStart', id: agentId, toolId, status: tool.status });
+      broadcast({
+        type: 'agentToolStart',
+        id: agentId,
+        toolId,
+        toolName: tool.name,
+        status: tool.status,
+      });
 
       await sleep(tool.durationMs);
       if (signal.stopped) break;
@@ -103,6 +109,7 @@ async function runSubagentTurn(
       id: parentId,
       parentToolId,
       toolId: subToolId,
+      toolName: tool.name,
       status: tool.status,
     });
     await sleep(tool.durationMs);
@@ -136,7 +143,13 @@ async function runAgentWithSubagentsLoop(
     for (const tool of regularTools) {
       if (signal.stopped) break;
       const toolId = uid();
-      broadcast({ type: 'agentToolStart', id: agentId, toolId, status: tool.status });
+      broadcast({
+        type: 'agentToolStart',
+        id: agentId,
+        toolId,
+        toolName: tool.name,
+        status: tool.status,
+      });
       await sleep(tool.durationMs);
       broadcast({ type: 'agentToolDone', id: agentId, toolId });
       await sleep(300);
@@ -151,6 +164,7 @@ async function runAgentWithSubagentsLoop(
       type: 'agentToolStart',
       id: agentId,
       toolId: taskToolId,
+      toolName: 'Task',
       status: `Subtask: Implement the authentication module`,
     });
 
@@ -189,7 +203,13 @@ async function runAgentWithPermissionLoop(
     for (const tool of tools) {
       if (signal.stopped) break;
       const toolId = uid();
-      broadcast({ type: 'agentToolStart', id: agentId, toolId, status: tool.status });
+      broadcast({
+        type: 'agentToolStart',
+        id: agentId,
+        toolId,
+        toolName: tool.name,
+        status: tool.status,
+      });
       await sleep(tool.durationMs);
       broadcast({ type: 'agentToolDone', id: agentId, toolId });
       await sleep(300);
@@ -203,6 +223,7 @@ async function runAgentWithPermissionLoop(
       type: 'agentToolStart',
       id: agentId,
       toolId: bashToolId,
+      toolName: 'Bash',
       status: 'Running: rm -rf dist/',
     });
 

@@ -22,6 +22,7 @@
     "build:server": "cd server && npx esbuild src/index.ts --bundle --platform=node --format=esm --outfile=../dist/server.js --external:node-pty --external:express --external:ws --external:pngjs && ln -sf ../server/node_modules ../dist/node_modules",
     "start": "node dist/server.js",
     "test:cli": "node --test bin/cli.test.js",
+    "test:phase1": "npm run build && cd webview-ui && npm run test:e2e:phase1",
     "prepare": "husky",
     "lint": "cd server && npx eslint src",
     "lint:webview": "cd webview-ui && npm run lint",

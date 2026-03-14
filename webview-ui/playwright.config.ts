@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  testIgnore: 'phase1.spec.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0, // Fail immediately so the agent sees the error

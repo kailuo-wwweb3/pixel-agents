@@ -33,17 +33,7 @@ const PORT = parseInt(process.env.PORT ?? '3000', 10);
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 
-// Serve static webview files
-const webviewDist = path.join(__dirname, '..', 'dist', 'webview');
-if (fs.existsSync(webviewDist)) {
-  app.use(express.static(webviewDist));
-  // SPA fallback
-  app.get('/{*splat}', (_req, res) => {
-    res.sendFile(path.join(webviewDist, 'index.html'));
-  });
-}
-
-// REST API
+// REST API (registered before static/SPA fallback so routes are not shadowed)
 app.get('/api/workspaces', (_req, res) => {
   res.json(workspaceFolders.map((p) => ({ name: path.basename(p), path: p })));
 });
@@ -73,6 +63,16 @@ app.delete('/api/dev/mock', (_req, res) => {
   }
   res.json({ ok: true });
 });
+
+// Serve static webview files (after API routes so /api/* is never caught by SPA fallback)
+const webviewDist = path.join(__dirname, '..', 'dist', 'webview');
+if (fs.existsSync(webviewDist)) {
+  app.use(express.static(webviewDist));
+  // SPA fallback for client-side routing
+  app.get('/{*splat}', (_req, res) => {
+    res.sendFile(path.join(webviewDist, 'index.html'));
+  });
+}
 
 const server = app.listen(PORT, () => {
   console.log(`[Server] Listening on http://localhost:${PORT}`);

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots"
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:phase1": "playwright test --config playwright.phase1.config.ts"
   },
   "dependencies": {
     "@xterm/addon-fit": "^0.10.0",
