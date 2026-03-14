@@ -7,6 +7,9 @@
     "node-pty": "^1",
     "pngjs": "^7"
   },
+  "scripts": {
+    "postinstall": "chmod +x node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper node_modules/node-pty/prebuilds/darwin-arm64/pty.node node_modules/node-pty/prebuilds/darwin-x64/spawn-helper node_modules/node-pty/prebuilds/darwin-x64/pty.node 2>/dev/null; true"
+  },
   "devDependencies": {
     "typescript": "^5",
     "@types/node": "22.x",
